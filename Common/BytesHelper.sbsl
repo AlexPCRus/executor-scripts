@@ -1,4 +1,19 @@
 @Global
+method Append(Data1: Bytes, Data2: Bytes, Data3: Bytes = Bytes{}, Data4: Bytes = Bytes{}, Data5: Bytes = Bytes{}): Bytes
+    use InStream = new TemporaryWritableStream(Data1.Size() + Data2.Size() + Data3.Size() + Data4.Size() + Data5.Size())
+    
+    InStream.Write(Data1)
+    InStream.Write(Data2)
+    InStream.Write(Data3)
+    InStream.Write(Data4)
+    InStream.Write(Data5)
+
+    use OutStream = InStream.OpenReadableStream()
+
+    return OutStream.ReadAsBytes()
+;
+
+@Global
 method IndexOf(Data1: Bytes, Data2: Bytes, Data1StartIndex = 0): Number
     var StartIndex = -1
     var Data2Index = 0
