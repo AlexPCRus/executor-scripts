@@ -22,15 +22,17 @@ method Script(
     val Database = V8Database.NewInstance(Connection)
 
     if not Database.HasExtension(ExtensionName)
-        Logger.e("Extension \"%ExtensionName\" is not connected to the infobase \"%Infobase\"")
+        Logger.e("Extension \"%ExtensionName\" is not connected to the infobase \"%Infobase\"", True)
     ;
 
-    Logger.i("Blocking connections")
+    val InfobasePath = "%Server/%Infobase/%ExtensionName"
+
+    Logger.i("Blocking connections (%InfobasePath)")
     Ras.BlockConnections(Infobase, User, Password, AccessCode)
 
-    Logger.i("Updating extension (%Server/%Infobase/%ExtensionName)")
+    Logger.i("Updating extension (%InfobasePath)")
     BatchMode.UpdateExtension(Server, Infobase, User, Password, AccessCode, ExtensionName, ExtensionPath, PlatformVersion)
 
-    Logger.i("Unblocking connections")
+    Logger.i("Unblocking connections (%InfobasePath)")
     Ras.UnblockConnections(Infobase, User, Password)
 ;

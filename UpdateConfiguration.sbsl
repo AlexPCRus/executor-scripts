@@ -21,24 +21,38 @@ method Script(
     val Database = V8Database.NewInstance(Connection)
     val ConfigInfo = Database.GetConfigInfo()
 
+    val InfobasePath = "%Server/%Infobase"
+
     if V8.VersionIsUpper(ConfigInfo.Version, RequiredVersion)
-        val CfuPath = Path.Join(TemplatesPath, RequiredVersion.Replace(".", "_"), "1cv8.cfu")
+        var CfuPath = Path.Join(TemplatesPath, RequiredVersion.Replace(".", "_"), "1cv8.cfu")
 
         if Path.Exists(CfuPath)
             Logger.i("Using CFU path: $CfuPath")
+
+            // Copy cfu and start updating from this one, cause it locks the source file and prevent parallel updatings
+            val TempUpdateDir = Files.CreateTempDirectory()
+
+            val TempCfu = Path.Join(TempUpdateDir.Path, "1cv8.cfu")
+            Files.Copy(CfuPath, TempCfu)
+
+            val UpdInfo = Path.Join(Path.GetParentPath(CfuPath), "UpdInfo.txt")
+            val TempUpdInfo = Path.Join(TempUpdateDir.Path, "UpdInfo.txt")
+            Files.Copy(UpdInfo, TempUpdInfo)
+
+            CfuPath = TempCfu
         else
-            Logger.e("Couldn't find CFU file of required version \"$RequiredVersion\" by path \"%CfuPath\"")
+            Logger.e("Couldn't find CFU file of required version \"$RequiredVersion\" by path \"%CfuPath\"", True)
         ;
 
-        Logger.i("Blocking connections")
+        Logger.i("Blocking connections (%InfobasePath)")
         Ras.BlockConnections(Infobase, User, Password, AccessCode)
 
-        Logger.i("Updating configuration (%Server/%Infobase)")
+        Logger.i("Updating configuration (%InfobasePath)")
         BatchMode.UpdateConfiguration(Server, Infobase, User, Password, AccessCode, CfuPath, PlatformVersion)
 
-        Logger.i("Unblocking connections")
+        Logger.i("Unblocking connections (%InfobasePath)")
         Ras.UnblockConnections(Infobase, User, Password)
     else
-        Logger.i("It doesn't need to update configuration (Current: ${ConfigInfo.Version}, Required: %RequiredVersion)")
+        Logger.i("It doesn't need to update configuration (%InfobasePath, Current: ${ConfigInfo.Version}, Required: %RequiredVersion)")
     ;
 ;

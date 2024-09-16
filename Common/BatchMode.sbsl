@@ -110,12 +110,17 @@ method UpdateExtension(
     AddOutFileToArguments(Args, OutFile)
 
     if Path.ExtensionIs(ExtensionPath, "cfe")
-        Args.Add("/LoadCfg\"${ExtensionPath}\" -Extension${ExtensionName}")
+        Args.Add("/LoadCfg\"${ExtensionPath}\"")
+		Args.Add("-Extension\"${ExtensionName}\"")
     else
-        Args.Add("/LoadConfigFromFiles\"${ExtensionPath}\" -Extension${ExtensionName}")
+        Args.Add("/LoadConfigFromFiles\"${ExtensionPath}\"")
+		Args.Add("-Extension\"${ExtensionName}\"")
     ;
 
-    Args.Add("/UpdateDBCfg -Dynamic- -Server -SessionTerminate force")
+    Args.Add("/UpdateDBCfg")
+	Args.Add("-Dynamic-")
+	Args.Add("-Server")
+	Args.Add("-SessionTerminate force")
     
     val ExitCode = Processes.Run(Platform.ExecutablePath, Args)
     RedirectOutToConsole(OutFile)
